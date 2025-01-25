@@ -1,0 +1,260 @@
+function createNavbar() {
+  const navbar = document.createElement('div');
+  navbar.id = 'gladiatus-navbar';
+  navbar.style.position = 'fixed';
+  navbar.style.bottom = '0';
+  navbar.style.left = '0';
+  navbar.style.width = '100%';
+  navbar.style.backgroundColor = '#2e2e2e';
+  navbar.style.color = '#fff';
+  navbar.style.padding = '5px 10px';
+  navbar.style.display = 'flex';
+  navbar.style.justifyContent = 'flex-start';
+  navbar.style.alignItems = 'center';
+  navbar.style.zIndex = '10000';
+  navbar.style.borderTop = '2px solid #f17a22';
+
+  // Przycisk włączania/wyłączania wtyczki
+  const toggleButton = document.createElement('button');
+  toggleButton.id = 'togglePlugin';
+  toggleButton.style.backgroundColor = '#f17a22';
+  toggleButton.style.color = 'white';
+  toggleButton.style.padding = '5px 15px';
+  toggleButton.style.border = 'none';
+  toggleButton.style.borderRadius = '5px';
+  toggleButton.style.cursor = 'pointer';
+  toggleButton.style.marginRight = '20px';
+
+  // Załaduj stan z localStorage, jeśli istnieje
+  const pluginState = localStorage.getItem('pluginEnabled');
+  if (pluginState === 'true') {
+    toggleButton.textContent = 'Wyłącz';
+    toggleButton.style.backgroundColor = 'red';
+  } else {
+    toggleButton.textContent = 'Włącz';
+    toggleButton.style.backgroundColor = '#f17a22';
+  }
+
+  // Funkcja do przełączania wtyczki
+  toggleButton.addEventListener('click', function () {
+    const isPluginEnabled = toggleButton.textContent === 'Włącz';  // Sprawdzamy obecny stan przycisku
+
+    if (isPluginEnabled) {
+      // Włącz wtyczkę
+      localStorage.setItem('pluginEnabled', 'true');
+      toggleButton.textContent = 'Wyłącz';
+      toggleButton.style.backgroundColor = 'red';
+    } else {
+      // Wyłącz wtyczkę
+      localStorage.setItem('pluginEnabled', 'false');
+      toggleButton.textContent = 'Włącz';
+      toggleButton.style.backgroundColor = '#f17a22';
+    }
+
+    // Uruchamianie lub zatrzymywanie funkcji na podstawie zaznaczenia checkboxów
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(function (checkbox) {
+      if (checkbox.checked) {
+        startFunction(checkbox.id);  // Uruchomienie funkcji, tylko gdy checkbox jest zaznaczony
+      }
+    });
+  });
+
+  navbar.appendChild(toggleButton);
+
+  // Dodajemy checkboxy do włączania funkcji
+  const settings = ['Wyprawy', 'Lochy', 'Leczenie', 'Złoto'];
+  settings.forEach(function (setting) {
+    const checkboxLabel = document.createElement('label');
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.id = setting;
+    checkboxLabel.textContent = setting;
+    checkboxLabel.style.marginRight = '20px';
+    checkboxLabel.style.fontSize = '14px';
+    checkboxLabel.style.color = '#f17a22';
+    checkboxLabel.appendChild(checkbox);
+    navbar.appendChild(checkboxLabel);
+
+    // Załaduj stan z localStorage
+    const checkboxState = localStorage.getItem(setting);
+    checkbox.checked = checkboxState === 'true';  // Ustaw stan checkboxa z zapisanych danych
+
+    // Dodanie listenera do checkboxów
+    checkbox.addEventListener('change', function () {
+      // Zapisz stan checkboxa do localStorage
+      localStorage.setItem(setting, checkbox.checked); // Zapisanie stanu
+    });
+  });
+
+  document.body.appendChild(navbar);
+}
+
+// Funkcja do uruchamiania odpowiednich działań w zależności od zaznaczonego checkboxa
+function startFunction(functionName) {
+  switch (functionName) {
+    case 'Wyprawy':
+      startExpeditions();
+      break;
+    case 'Lochy':
+      startDungeons();
+      break;
+    case 'Leczenie':
+      startHealing();
+      break;
+    case 'Złoto':
+      startGoldCollection();
+      break;
+    default:
+      break;
+  }
+}
+
+// Funkcje automatyzacji:
+function startExpeditions() {
+  console.log("Rozpoczynam wyprawy...");
+  
+  // Sprawdzamy, czy przycisk wyprawy jest gotowy do kliknięcia
+  const expeditionButton = document.querySelector('#cooldown_bar_expedition > .cooldown_bar_fill_ready'); // Selekcja przycisku wyprawy
+
+  if (expeditionButton) {
+    console.log("Przycisk wyprawy dostępny. Klikam...");
+    expeditionButton.click(); // Kliknięcie przycisku wyprawy
+
+    // Czekamy dłużej na pojawienie się przeciwników w divie #expedition_info1
+    setTimeout(() => {
+      const expeditionInfo = document.querySelector('#expedition_info1'); // Sekcja z informacjami o przeciwnikach
+      if (expeditionInfo) {
+        console.log("Sekcja przeciwników znaleziona.");
+        
+        // Sprawdzenie dostępnych przycisków ataku
+        const attackButton = document.querySelector('#expedition_list > div:nth-child(1) > div:nth-child(2) > button'); // Selekcja przycisku ataku
+        if (attackButton) {
+          console.log("Przycisk ataku dostępny. Klikam...");
+          attackButton.click(); // Kliknięcie przycisku ataku
+
+          // Czekamy na potwierdzenie wyboru przeciwnika
+          setTimeout(() => {
+            const confirmButton = document.querySelector('.confirm_expedition'); // Selekcja przycisku potwierdzenia wyprawy
+            if (confirmButton) {
+              console.log("Potwierdzam wyprawę...");
+              confirmButton.click(); // Kliknięcie przycisku potwierdzenia
+            } else {
+              console.log("Brak przycisku potwierdzenia wyprawy.");
+            }
+          }, 1000); // Opóźnienie na załadowanie przycisku potwierdzenia
+        } else {
+          console.log("Brak dostępnego przycisku ataku.");
+        }
+      } else {
+        console.log("Nie znaleziono sekcji z przeciwnikami.");
+      }
+    }, 2000); // Zwiększamy czas oczekiwania na załadowanie przeciwników
+  } else {
+    console.log("Brak dostępnych wypraw.");
+  }
+
+  // Jeśli chcesz, aby wyprawa powtarzała się automatycznie, dodajmy interwał czasowy
+  const interval = setInterval(() => {
+    const newExpeditionButton = document.querySelector('#cooldown_bar_expedition > .cooldown_bar_fill_ready');
+    if (newExpeditionButton) {
+      console.log("Automatycznie zaczynam kolejną wyprawę...");
+      newExpeditionButton.click(); // Automatyczne uruchamianie kolejnej wyprawy
+    } else {
+      console.log("Brak dostępnych wypraw. Czekam na nową...");
+                    confirmButton.click(); // Kliknięcie przycisku potwierdzenia
+    }
+  }, 60000); // Sprawdzanie co minutę (60000 ms)
+
+  // Możemy dodać mechanizm zatrzymywania automatycznych wypraw, gdy wtyczka jest wyłączona
+  function stopExpeditions() {
+    clearInterval(interval); // Zatrzymanie interwału
+    console.log("Automatyczne wyprawy zostały zatrzymane.");
+  }
+}
+
+
+
+
+
+function startDungeons() {
+  console.log("Rozpoczynam lochy...");
+  const startButton = document.querySelector('button.dungeonStart'); // Zmienna dla przycisku lochów
+  if (startButton) {
+    startButton.click();
+  }
+}
+
+function startHealing() {
+  console.log("Leczę postać...");
+  const healButton = document.querySelector('button.heal'); // Zmienna dla przycisku leczenia
+  if (healButton) {
+    healButton.click();
+  }
+}
+
+function startGoldCollection() {
+  console.log("Zbieram złoto...");
+  const collectButton = document.querySelector('button.collectGold'); // Zmienna dla przycisku zbierania złota
+  if (collectButton) {
+    collectButton.click();
+  }
+}
+
+function stopFunction(functionName) {
+  console.log(`${functionName} zostało wyłączone.`);
+  // Można dodać logikę zatrzymywania działań (np. wstrzymanie automatycznych kliknięć)
+}
+
+window.addEventListener('load', createNavbar);
+
+document.addEventListener("DOMContentLoaded", () => {
+  // Załaduj stan z localStorage, jeśli jest zapisany
+  const expeditionEnabled = localStorage.getItem('expeditionEnabled') === 'true'; // Sprawdź, czy funkcja wyprawy jest włączona
+
+  // Ustawienie stanu checkboxa na podstawie zapisanej wartości
+  const expeditionCheckbox = document.querySelector('#expeditionCheckbox');
+  if (expeditionCheckbox) {
+    expeditionCheckbox.checked = expeditionEnabled;
+  }
+
+  // Funkcja do zapisania stanu w localStorage
+  function saveState() {
+    localStorage.setItem('expeditionEnabled', expeditionCheckbox.checked); // Zapisz stan checkboxa
+  }
+
+  // Dodajemy nasłuchiwacz zdarzeń na checkboxie
+  if (expeditionCheckbox) {
+    expeditionCheckbox.addEventListener('change', saveState); // Zapisz stan po zmianie
+  }
+});
+
+// Funkcja uruchamiająca wyprawę, jeśli jest włączona
+function startExpeditionIfEnabled() {
+  const expeditionEnabled = localStorage.getItem('expeditionEnabled') === 'true';
+  if (expeditionEnabled) {
+    startExpeditions(); // Uruchomienie wyprawy, jeśli jest włączona
+  }
+}
+
+// Funkcja rozpoczęcia wyprawy
+function startExpeditions() {
+  console.log("Rozpoczynam wyprawy...");
+
+  // Selekcja przycisku wyprawy
+  const expeditionButton = document.querySelector('#cooldown_bar_expedition > .cooldown_bar_fill_ready');
+  if (expeditionButton) {
+    console.log("Przycisk wyprawy dostępny. Klikam...");
+    expeditionButton.click();
+
+    setTimeout(() => {
+      const attackButton = document.querySelector('#expedition_list > div:nth-child(1) > div:nth-child(2) > button');
+      if (attackButton) {
+        console.log("Klikam przycisk ataku...");
+        attackButton.click();
+      } else {
+        console.log("Nie znaleziono przycisku ataku.");
+      }
+    }, 2000);
+  }
+}
